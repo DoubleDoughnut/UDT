@@ -1,0 +1,9 @@
+Architecture: iphoneos-arm
+Author: DblD <DblD@appaddict.org>
+Maintainer: DblD <DblD@appaddict.org>
+Depends: apt, dpkg, file-cmds, unzip
+Description: Ultimate Debian Tool (UDT) is a simple script that allows you to install a .deb, build a .deb, make a control file or, even, convert a .zip to a .deb.
+Name: Ultimate Debian Tool
+Package: com.itiaprepo.udt
+Version: 1.4
+

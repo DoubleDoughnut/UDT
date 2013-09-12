@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "Setting permissions..."
+
+chmod 775 /usr/bin/udt
+
+echo "Permissions set"
+
+echo "Done. Just open up Terminal, login as root and type in udt."
+
+echo "Place your .debs/.zips or folders in /var/root"
+
+exit 0

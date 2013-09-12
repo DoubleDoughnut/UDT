@@ -1,0 +1,181 @@
+#!/bin/bash
+if [ $UID -ne 0 ]; then
+   echo "Please run as root!"
+   exit 1
+fi
+cd
+echo ""
+echo "..........U - Ultimate.........."
+echo "..........D - Debian............"
+echo "..........T - Tool.............."
+echo ""
+echo "****Place your files* in /var/root****"
+echo ""
+echo "---files* = .debs, folders or .zips---"
+echo ""
+echo "---The output file for conversion is newDeb.deb---"
+echo ""
+echo "======= Version 1.5 by DblD ======="
+echo ""
+PS3='Please choose your option: '
+options=("Install a .deb" "Build a .deb" "Make a control file" "Convert .zip to .deb" "Quit")
+select opt in "${options[@]}"
+do
+    case $opt in
+	"Install a .deb")
+	    printf "Please select a .deb to install:\n"
+echo ""
+echo "*****To exit out of this menu:*****"
+echo "*Type a number that isn't in the list.*"
+echo "***I recommend respringing after install!***"
+echo ""
+select f in /var/root/*.deb; do test -n "$f" && break; echo ">>> Invalid Selection, sending you back to the start" && udt; exit 1; done
+dpkg -i "$f"; apt-get install -f
+read -p "Do you want to respring (y/n)?" choice
+case "$choice" in 
+  y|Y ) echo "Respringing..."
+  killall backboardd
+			;;
+  n|N ) echo "Going back to the start"
+  udt; exit 1
+			;;
+  * ) udt; exit 1;;
+esac
+	    ;;
+	"Build a .deb")
+	    printf "Please select a folder to build a .deb:\n"
+echo ""
+echo "*****To exit out of this menu:*****"
+echo "*Type a number that isn't in the list.*"
+echo ""
+select d in /var/root/*; do test -n "$d" && break; echo ">>> Invalid Selection, sending you back to the start" && udt; exit 1; done
+chmod 775 "$d/DEBIAN"
+chmod 775 "$d/DEBIAN/control"
+test -e "$d/DEBIAN/preinst" && chmod 775 "$d/DEBIAN/preinst"
+test -e "$d/DEBIAN/postinst" && chmod 775 "$d/DEBIAN/postinst"
+test -e "$d/DEBIAN/prerm" && chmod 775 "$d/DEBIAN/prerm"
+test -e "$d/DEBIAN/postrm" && chmod 775 "$d/DEBIAN/postrm"
+test -e "$d/DEBIAN/extrainst_" && chmod 775 "$d/DEBIAN/extrainst_"
+dpkg -b "$d" && udt; exit 1
+	    ;;
+	"Make a control file")
+if [ -e /var/root/control ]; then
+echo "A control file already exists in /var/root!"
+echo "Do you want to back it up?"
+read -p "Back it up - y / Overwrite - n / Exit to UDT (so you can move it manually) - anything else : " choice
+case "$choice" in 
+  y|Y ) echo "Backing it up..."
+  mv /var/root/control /var/root/control.bak
+  echo "Backed up to control.bak, next time you choose backup, the currently backed up file (control.bak) will be overwritten!"
+			;;
+  n|N ) echo "It will be overwritten!"
+			;;
+  * ) echo "Going back to the start, so you can quit and move the control file manually"; udt; exit 1;;
+esac
+fi
+function pkgnamef {
+echo -n "Package name (e.g. domain.sitename.packagename): "
+read pkgname
+if [ -z $pkgname ]; then
+echo "This field must not be empty!"
+pkgnamef
+fi
+}
+pkgnamef
+function rpkgnamef {
+echo -n "Package name (real name): "
+read rpkgname
+if [ -z $rpkgname ]; then
+echo "This field must not be empty!"
+rpkgnamef
+fi
+}
+rpkgnamef
+function verf {
+echo -n "Version: "
+read ver
+if [ -z $ver ]; then
+echo "This field must not be empty!"
+verf
+fi
+}
+verf
+function descf {
+echo -n "Description: "
+read desc
+if [ -z $desc ]; then
+echo "This field must not be empty!"
+descf
+fi
+}
+descf
+function maintf {
+echo -n "Maintainer: "
+read maint
+if [ -z $maint ]; then
+echo "This field must not be empty!"
+maintf
+fi
+}
+maintf
+function authf {
+echo -n "Author: "
+read auth
+if [ -z $auth ]; then
+echo "This field must not be empty!"
+authf
+fi
+}
+authf
+echo -n "Conflicts (optional, e.g. com.firstpackageIdont.like, com.secondpackageIdont.like): "
+read conf
+echo -n "Depends (optional, same format as conflicts, but you need these packages): "
+read dep
+echo "Package: $pkgname" > /var/root/control
+echo "Name: $rpkgname" >> /var/root/control
+echo "Version: $ver" >> /var/root/control
+echo "Architecture: iphoneos-arm" >> /var/root/control
+echo "Description: $desc" >> /var/root/control
+echo "Maintainer: $maint" >> /var/root/control
+echo "Author: $auth" >> /var/root/control
+echo "Conflicts: $conf" >> /var/root/control
+echo "Depends: $dep" >> /var/root/control
+chmod 775 /var/root/control
+echo "Done, your control file is located in /var/root"
+udt; exit 1
+	    ;;
+	"Convert .zip to .deb")
+	    printf "Please select a .zip to convert to .deb:\n"
+echo ""
+echo "*****To exit out of this menu:*****"
+echo "*Type a number that isn't in the list.*"
+echo ""
+select z in *.zip; do test -n "$z" && break; echo ">>> Invalid Selection, sending you back to the start" && udt; exit 1; done
+echo ""
+echo "*****The output file is newDeb.deb*****"
+echo ""
+unzip $z -d /var/root/newDeb
+chmod 775 "/var/root/newDeb/DEBIAN"
+chmod 775 "/var/root/newDeb/DEBIAN/control"
+test -e "/var/root/newDeb/DEBIAN/preinst" && chmod 775 "/var/root/newDeb/DEBIAN/preinst"
+test -e "/var/root/newDeb/DEBIAN/postinst" && chmod 775 "$d/DEBIAN/postinst"
+test -e "/var/root/newDeb/DEBIAN/prerm" && chmod 775 "/var/root/newDeb/DEBIAN/prerm"
+test -e "/var/root/newDeb/DEBIAN/postrm" && chmod 775 "/var/root/newDeb/DEBIAN/postrm"
+test -e "/var/root/newDeb/DEBIAN/extrainst_" && chmod 775 "/var/root/newDeb/DEBIAN/extrainst_"
+dpkg -b "/var/root/newDeb"
+rm -rf /var/root/newDeb && udt; exit 1;
+	    ;;
+	"Quit")
+	    echo "Exiting..."
+	    break
+	    ;;
+	*) echo invalid option;;
+    esac
+done
+#It automatically changes permissions when building a .deb or converting a .zip to .deb!
+#It relies heavily on chmod and dpkg commands!
+#Uses only one apt-get command!
+#You can basically say it depends on apt-get, chmod and dpkg, which are included in a jailbroken iDevice by default, so no need for dependencies!
+#Version 2.0 will be out if I decide to do a complete rewrite that will work better, if it's possible (if not, I'll just release like 1.6 etc. if any bugs arise)
+# ..... Money in the bank, pimpin' ain't easy!
+# ..... Max swag level reached (over 9000)!
